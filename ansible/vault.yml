@@ -1,0 +1,7 @@
+# PulseNet Ansible Vault File
+# Stores encrypted sensitive data for secure deployment
+vault_api_token: abc123xyz789            # API token for endpoint authentication
+vault_db_user: pulsenet_user            # MariaDB username
+vault_db_password: P@ssw0rd123!         # MariaDB password (replace with a secure value)
+vault_db_name: pulsenet_db              # MariaDB database name
+vault_server_url: http://192.168.1.10:8080  # Server URL for proxy communication

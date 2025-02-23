@@ -1,0 +1,11 @@
+# Go Go Gadget Configuration File
+# Defines intervals, timeouts, and scoring weights for Proxy Selection
+
+polling_interval_seconds: 5      # How often proxies check for new tasks (in seconds)
+snmp_timeout_seconds: 2          # Timeout for SNMP checks (in seconds)
+max_tasks: 100                   # Maximum number of tasks that can be queued
+scoring_weights:                 # Weights used to score proxy performance
+  ping_latency: 0.4              # Weight for ping latency (40%)
+  hop_count: 0.2                 # Weight for traceroute hop count (20%)
+  snmp_success: 0.3              # Weight for SNMP success (30%)
+  ssh_status: 0.1                # Weight for SSH port status (10%)

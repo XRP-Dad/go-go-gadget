@@ -1,0 +1,14 @@
+# Go Go Gadget Proxy Systemd Service File
+[Unit]
+Description=Go Go Gadget Proxy - Point Broadband Reachability Tool
+After=network.target
+
+[Service]
+EnvironmentFile=/etc/gogogadget.env
+ExecStart=/usr/local/bin/gogogadget --role proxy --port 8080 --proxy-name {{ inventory_hostname }} --config /etc/gogogadget/config.yml
+Restart=always
+User=root
+RestartSec=5s
+
+[Install]
+WantedBy=multi-user.target

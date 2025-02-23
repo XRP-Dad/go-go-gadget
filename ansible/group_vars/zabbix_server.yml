@@ -1,0 +1,5 @@
+# Server-specific variables for Go Go Gadget deployment
+api_token: "{{ vault_api_token }}"
+db_user: "{{ vault_db_user }}"
+db_password: "{{ vault_db_password }}"
+db_name: "{{ vault_db_name }}"

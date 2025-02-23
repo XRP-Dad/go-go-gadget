@@ -1,0 +1,111 @@
+# Go Go Gadget Server Deployment Tasks
+# Installs dependencies, sets up MariaDB, and deploys the server binary and service
+
+- name: Install required dependencies
+  apt:
+    name:
+      - golang          # Go programming language for building the binary
+      - mariadb-server  # MariaDB for persistent storage
+      - git             # For version control (optional but useful)
+      - redis-server    # Redis for task queuing
+    state: present
+    update_cache: yes
+
+- name: Ensure MariaDB service is running and enabled
+  service:
+    name: mariadb
+    state: started
+    enabled: true
+
+- name: Ensure Redis service is running and enabled
+  service:
+    name: redis-server
+    state: started
+    enabled: true
+
+- name: Check if Go Go Gadget database exists
+  mysql_db:
+    name: "{{ db_name }}"
+    state: present
+    login_user: root
+    login_password: "{{ mysql_root_password }}"
+  register: db_exists
+  ignore_errors: true
+
+- name: Create Go Go Gadget database user
+  mysql_user:
+    name: "{{ db_user }}"
+    password: "{{ db_password }}"
+    priv: '{{ db_name }}.*:ALL'
+    host: localhost
+    state: present
+    login_user: root
+    login_password: "{{ mysql_root_password }}"
+  when: not db_exists.failed
+  no_log: true  # Prevents logging sensitive data
+
+- name: Copy SQL setup script to target host
+  copy:
+    src: ../../../scripts/setup_database.sql
+    dest: /tmp/setup_database.sql
+  when: db_exists.failed
+
+- name: Run SQL setup script to initialize Go Go Gadget database
+  mysql_db:
+    name: "{{ db_name }}"
+    state: import
+    target: /tmp/setup_database.sql
+    login_user: root
+    login_password: "{{ mysql_root_password }}"
+  when: db_exists.failed
+
+- name: Ensure Go Go Gadget config directory exists
+  file:
+    path: /etc/gogogadget
+    state: directory
+    mode: '0755'
+
+- name: Copy Go Go Gadget configuration file to target host
+  copy:
+    src: ../../../config/config.yml
+    dest: /etc/gogogadget/config.yml
+    mode: '0644'
+
+- name: Copy Go Go Gadget source code to target host
+  copy:
+    src: ../../../src/gogogadget.go
+    dest: /opt/gogogadget/src/gogogadget.go
+
+- name: Build Go Go Gadget Go binary
+  command: go build -o /usr/local/bin/gogogadget /opt/gogogadget/src/gogogadget.go
+  args:
+    chdir: /opt/gogogadget/src
+  register: build_result
+  changed_when: build_result.rc == 0
+
+- name: Create Go Go Gadget environment file for server
+  template:
+    src: gogogadget.env.j2
+    dest: /etc/gogogadget.env
+    mode: '0600'  # Restrict access to root only
+    owner: root
+    group: root
+
+- name: Deploy Go Go Gadget server systemd service file
+  template:
+    src: gogogadget-server.service.j2
+    dest: /etc/systemd/system/gogogadget-server.service
+    mode: '0644'
+
+- name: Enable and restart Go Go Gadget server service
+  systemd:
+    name: gogogadget-server
+    enabled: yes
+    state: restarted
+    daemon_reload: yes
+
+- name: Allow port 8080 in firewall
+  ufw:
+    rule: allow
+    port: 8080
+    proto: tcp

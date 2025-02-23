@@ -1,0 +1,3 @@
+# Proxy-specific variables for Go Go Gadget deployment
+api_token: "{{ vault_api_token }}"
+server_url: "{{ vault_server_url }}"

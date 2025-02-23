@@ -1,0 +1,14 @@
+# Go Go Gadget Ansible Deployment Playbook
+# Deploys the Go Go Gadget server and proxies to their respective hosts
+
+- name: Deploy Go Go Gadget Server
+  hosts: zabbix_server
+  become: true
+  roles:
+    - gogogadget_server
+
+- name: Deploy Go Go Gadget Proxies
+  hosts: zabbix_proxies
+  become: true
+  roles:
+    - gogogadget_proxy

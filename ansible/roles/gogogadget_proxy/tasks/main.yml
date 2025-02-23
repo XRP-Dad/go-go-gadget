@@ -1,0 +1,53 @@
+# PulseNet Proxy Deployment Tasks
+# Installs dependencies, builds the binary, and deploys the proxy service
+
+- name: Install Golang
+  apt:
+    name: golang
+    state: present
+    update_cache: yes
+
+- name: Ensure config directory exists
+  file:
+    path: /etc/pulsenet
+    state: directory
+    mode: '0755'
+
+- name: Copy configuration file to target host
+  copy:
+    src: ../../../config/config.yml
+    dest: /etc/pulsenet/config.yml
+    mode: '0644'
+
+- name: Copy Go source code to target host
+  copy:
+    src: ../../../src/pulsenet.go
+    dest: /opt/pulsenet/src/pulsenet.go
+
+- name: Build PulseNet Go binary
+  command: go build -o /usr/local/bin/pulsenet /opt/pulsenet/src/pulsenet.go
+  args:
+    chdir: /opt/pulsenet/src
+  register: build_result
+  changed_when: build_result.rc == 0
+
+- name: Create PulseNet environment file for proxy
+  template:
+    src: pulsenet.env.j2
+    dest: /etc/pulsenet.env
+    mode: '0600'  # Restrict access to root only
+    owner: root
+    group: root
+
+- name: Deploy PulseNet proxy systemd service file
+  template:
+    src: pulsenet-proxy.service.j2
+    dest: /etc/systemd/system/pulsenet-proxy.service
+    mode: '0644'
+
+- name: Enable and restart PulseNet proxy service
+  systemd:
+    name: pulsenet-proxy
+    enabled: yes
+    state: restarted
+    daemon_reload: yes
