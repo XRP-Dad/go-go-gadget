@@ -67,10 +67,11 @@ sudo apt install ansible git python3-pip -y
 pip3 install pyzabbix requests
 Ensures Ansible, Git, and Python dependencies are available for deployment and Netbox integration.
 Set Up SSH Access:
-bash
+'''bash
 ssh-copy-id ubuntu@192.168.1.10
 ssh-copy-id ubuntu@192.168.1.11
 ssh-copy-id ubuntu@192.168.1.12
+'''
 Configures passwordless SSH access to target hosts for Ansible.
 Step 2: Configure the Project
 Create Directory Structure:
