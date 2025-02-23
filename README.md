@@ -56,40 +56,42 @@ graph TD
     H --> AA[vault.yml <br> # Encrypted secrets]
     A --> AB[netbox_script.py <br> # Netbox/Zabbix integration]
     A --> AC[README.md <br> # Project documentation]
-
 ```
 ## Deployment Process
 Step 1: Prepare the Control Machine
 Install Dependencies:
-bash
+```bash
 sudo apt update
 sudo apt install ansible git python3-pip -y
 pip3 install pyzabbix requests
+```
 Ensures Ansible, Git, and Python dependencies are available for deployment and Netbox integration.
 Set Up SSH Access:
-'''bash
+```bash
 ssh-copy-id ubuntu@192.168.1.10
 ssh-copy-id ubuntu@192.168.1.11
 ssh-copy-id ubuntu@192.168.1.12
-'''
+```
 Configures passwordless SSH access to target hosts for Ansible.
 Step 2: Configure the Project
 Create Directory Structure:
-bash
+```bash
 mkdir -p gogogadget/{src,scripts,config,ansible/roles/gogogadget_{server,proxy}/{tasks,templates},ansible/group_vars}
 cd gogogadget
+```
 Sets up the project structure locally.
 Update Inventory:
 Edit ansible/inventory.ini with your actual server and proxy IPs and SSH usernames.
 Configure Vault:
-bash
+```bash
 ansible-vault create ansible/vault.yml
+```
 Enter a secure vault password and populate with encrypted secrets (e.g., API token, DB credentials).
 Copy Code:
 Place all files from this document into their respective directories as outlined above.
 Step 3: Test Locally (Pre-Deployment)
 Build the Go Binary:
-bash
+```bash
 cd src
 go build -o gogogadget gogogadget.go
 Compiles the Go Go Gadget binary locally for testing.
@@ -100,48 +102,56 @@ export DB_USER=gogogadget_user
 export DB_PASSWORD=P@ssw0rd123!
 export DB_NAME=gogogadget_db
 ./gogogadget --role server --port 8080 --config ../config/config.yml
+```
 Starts the server on localhost:8080.
 Run Proxy Locally:
-bash
+```bash
 export API_TOKEN=abc123xyz789
 export SERVER_URL=http://localhost:8080
 ./gogogadget --role proxy --proxy-name test-proxy --config ../config/config.yml
+```
 Starts a test proxy instance.
 Test Endpoints:
-bash
->curl -H "Authorization: Bearer abc123xyz789" -X POST -d '{"host":"8.8.8.8","communities":["public","private"]}' http://localhost:8080/start-check
+```bash
+curl -H "Authorization: Bearer abc123xyz789" -X POST -d '{"host":"8.8.8.8","communities":["public","private"]}' http://localhost:8080/start-check
 curl -H "Authorization: Bearer abc123xyz789" http://localhost:8080/health
 curl -H "Authorization: Bearer abc123xyz789" http://localhost:8080/config
 curl -H "Authorization: Bearer abc123xyz789" -X POST -d '{"host":"test.local"}' http://localhost:8080/test-check
+```
 Validates basic functionality and new endpoints.
 Step 4: Deploy with Ansible
 Set Environment Variables:
 Ensure mysql_root_password is set or stored securely (e.g., in Vault) for initial DB setup.
 Execute Playbook:
-bash
+```bash
 cd ansible
 ansible-playbook -i inventory.ini deploy.yml --ask-vault-pass --extra-vars "mysql_root_password=your-root-password"
+```
 Deploys the server and proxies, prompting for the Vault password.
 Verify Deployment:
 Server:
-bash
+```bash
 ssh ubuntu@192.168.1.10 "sudo systemctl status gogogadget-server"
+```
 Proxies:
-bash
+```bash
 ssh ubuntu@192.168.1.11 "sudo systemctl status gogogadget-proxy"
 ssh ubuntu@192.168.1.12 "sudo systemctl status gogogadget-proxy"
+```
 Checks service status on all hosts.
 Step 5: Post-Deployment Testing
 Check Database:
-bash
+```bash
 ssh ubuntu@192.168.1.10 "mysql -u gogogadget_user -pP@ssw0rd123! -e 'USE gogogadget_db; SHOW TABLES;'"
+```
 Verifies tasks and results tables exist.
 Run Netbox Script:
-bash
+```bash
 export GOGOGADGET_API_TOKEN=abc123xyz789
 export ZABBIX_USER=Admin
 export ZABBIX_PASS=zabbix
 python3 netbox_script.py
+```
 Tests integration with Zabbix and Go Go Gadget server.
 Configuration
 MariaDB:
@@ -156,27 +166,32 @@ Config File: /etc/gogogadget/config.yml defines polling intervals, SNMP timeouts
 Usage
 Starting a Check
 Initiate a reachability check:
-bash
+```bash
 curl -H "Authorization: Bearer abc123xyz789" -X POST -d '{"host":"target.example.com","communities":["public","private"]}' http://192.168.1.10:8080/start-check
+```
 Returns: {"task_id": "task-<timestamp>"}
 Retrieving Results
 Fetch results for a task:
-bash
+```bash
 curl -H "Authorization: Bearer abc123xyz789" http://192.168.1.10:8080/get-results?task_id=task-<timestamp>
+```
 Health Check
 Check system status:
-bash
+```bash
 curl -H "Authorization: Bearer abc123xyz789" http://192.168.1.10:8080/health
+```
 Configuration Retrieval
 View current settings:
-bash
+```bash
 curl -H "Authorization: Bearer abc123xyz789" http://192.168.1.10:8080/config
+```
 Test Check
 Run a mock check:
-bash
+```bash
 curl -H "Authorization: Bearer abc123xyz789" -X POST -d '{"host":"test.local"}' http://192.168.1.10:8080/test-check
+```
 Process Flowchart
-'''mermaid
+```mermaid
 graph TD
     A[Netbox Initiates Check] --> B[Server Creates Task]
     B --> C[Task Queued in Redis]
@@ -188,7 +203,8 @@ graph TD
     H --> I[Netbox Polls for Results]
     I --> J[Netbox Scores Proxies]
     J --> K[Best Proxy Selected]
-    K --> L[End]'''
+    K --> L[End]
+```
 Flowchart Explanation
 Netbox Initiates Check: Netbox sends a POST request to /start-check with host and SNMP communities.
 Server Creates Task: A unique task ID is generated and stored in MariaDB.
@@ -204,15 +220,15 @@ Best Proxy Selected: Identifies the top-scoring proxy for monitoring.
 End: Process completes with the best proxy selected.
 Troubleshooting
 Logs:
-Server: tail -f /var/log/gogogadget.log (check for "Go-go Gadget" Easter egg on startup!)
+Server: ```tail -f /var/log/gogogadget.log```(check for "Go-go Gadget" Easter egg on startup!)
 Proxy: Same log file, look for proxy-specific messages.
 MariaDB:
-Verify connection: mysql -u gogogadget_user -pP@ssw0rd123! -e "SELECT 1;"
+Verify connection: ```mysql -u gogogadget_user -pP@ssw0rd123! -e "SELECT 1;"```
 Redis:
-Check queue: redis-cli -h localhost -p 6379 llen task_queue
+Check queue: ```redis-cli -h localhost -p 6379 llen task_queue```
 Service Status:
-sudo systemctl status gogogadget-server
-sudo systemctl status gogogadget-proxy
+```sudo systemctl status gogogadget-server```
+```sudo systemctl status gogogadget-proxy```
 Security Notes
 Credentials: Store API tokens and DB passwords in vault.yml, encrypted with a strong vault password.
 Firewall: Ensure only port 8080 is open (sudo ufw allow 8080/tcp).
