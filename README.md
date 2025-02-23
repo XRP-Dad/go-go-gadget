@@ -205,21 +205,21 @@ graph TD
     J --> K[Best Proxy Selected]
     K --> L[End]
 ```
-Flowchart Explanation
-Netbox Initiates Check: Netbox sends a POST request to /start-check with host and SNMP communities.
-Server Creates Task: A unique task ID is generated and stored in MariaDB.
-Task Queued in Redis: Task ID is pushed to a Redis queue for proxy pickup.
-Proxies Poll Server: Proxies periodically request tasks via /get-task.
-Proxy Fetches Task: A proxy retrieves a task ID and details from the server.
-Proxy Performs Checks: Executes ping, traceroute, SNMP (in parallel), and SSH checks.
-Proxy Submits Results: Sends results to /submit-result.
-Server Stores Results: Results are saved in MariaDB, task marked complete.
-Netbox Polls for Results: Queries /get-results until data is available.
-Netbox Scores Proxies: Applies weighted scoring (ping: 40%, hops: 20%, SNMP: 30%, SSH: 10%).
-Best Proxy Selected: Identifies the top-scoring proxy for monitoring.
-End: Process completes with the best proxy selected.
-Troubleshooting
-Logs:
+##Flowchart Explanation
+1. Netbox Initiates Check: Netbox sends a POST request to /start-check with host and SNMP communities.
+2. Server Creates Task: A unique task ID is generated and stored in MariaDB.
+3. Task Queued in Redis: Task ID is pushed to a Redis queue for proxy pickup.
+4. Proxies Poll Server: Proxies periodically request tasks via /get-task.
+5. Proxy Fetches Task: A proxy retrieves a task ID and details from the server.
+6. Proxy Performs Checks: Executes ping, traceroute, SNMP (in parallel), and SSH checks.
+7. Proxy Submits Results: Sends results to /submit-result.
+8. Server Stores Results: Results are saved in MariaDB, task marked complete.
+9. Netbox Polls for Results: Queries /get-results until data is available.
+10. Netbox Scores Proxies: Applies weighted scoring (ping: 40%, hops: 20%, SNMP: 30%, SSH: 10%).
+11. Best Proxy Selected: Identifies the top-scoring proxy for monitoring.
+12. End: Process completes with the best proxy selected.
+###Troubleshooting
+#Logs:
 Server: ```tail -f /var/log/gogogadget.log```(check for "Go-go Gadget" Easter egg on startup!)
 Proxy: Same log file, look for proxy-specific messages.
 MariaDB:
