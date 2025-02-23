@@ -158,14 +158,14 @@ MariaDB:
 Database: gogogadget_db
 User: gogogadget_user
 Password: Set in vault.yml (e.g., P@ssw0rd123!)
-Stored in /etc/gogogadget.env
+Stored in ```/etc/gogogadget.env```
 Environment Variables:
 Server: API_TOKEN, DB_USER, DB_PASSWORD, DB_NAME
 Proxy: API_TOKEN, SERVER_URL
-Config File: /etc/gogogadget/config.yml defines polling intervals, SNMP timeouts, and scoring weights.
-Usage
-Starting a Check
-Initiate a reachability check:
+Config File: ```/etc/gogogadget/config.yml``` defines polling intervals, SNMP timeouts, and scoring weights.
+## Usage
+# Starting a Check
+# Initiate a reachability check:
 ```bash
 curl -H "Authorization: Bearer abc123xyz789" -X POST -d '{"host":"target.example.com","communities":["public","private"]}' http://192.168.1.10:8080/start-check
 ```
