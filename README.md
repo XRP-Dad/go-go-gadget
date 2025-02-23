@@ -1,6 +1,5 @@
 Go Go Gadget
-Go Go Gadget is a network reachability tool developed for internal use by Point Broadband employees.
-Unauthorized distribution or use is prohibited. Developed in 2025.
+Go Go Gadget is a network reachability tool.
 Overview
 Go Go Gadget is a sophisticated network monitoring system designed to assess host reachability using Zabbix proxies. It performs checks like ping, traceroute, SNMP, and SSH port status, leveraging a server-proxy architecture. The server manages tasks via HTTP endpoints, while proxies execute checks and submit results. Integration with Zabbix and Netbox provides dynamic proxy and community data, and MariaDB ensures persistent storage. Ansible automates deployment for consistency and ease.
 Key Features
