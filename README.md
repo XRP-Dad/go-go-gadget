@@ -26,6 +26,38 @@ Go Go Gadget is a sophisticated network monitoring system designed to assess hos
 
 ## Directory Structure
 
+```plaintext
+gogogadget/
+├── src/
+│   └── gogogadget.go              # Core Go application for server and proxy functionality
+├── scripts/
+│   └── setup_database.sql         # MariaDB setup script for database initialization
+├── config/
+│   └── config.yml                # Configuration file for intervals and scoring weights
+├── ansible/
+│   ├── inventory.ini             # Defines server and proxy hosts
+│   ├── deploy.yml                # Main Ansible deployment playbook
+│   ├── group_vars/
+│   │   ├── zabbix_server.yml     # Server-specific variables (e.g., DB credentials)
+│   │   └── zabbix_proxies.yml    # Proxy-specific variables (e.g., server URL)
+│   ├── roles/
+│   │   ├── gogogadget_server/
+│   │   │   ├── tasks/
+│   │   │   │   └── main.yml      # Tasks to deploy the server
+│   │   │   └── templates/
+│   │   │       ├── gogogadget.env.j2         # Server environment file
+│   │   │       └── gogogadget-server.service.j2  # Server systemd service
+│   │   └── gogogadget_proxy/
+│   │       ├── tasks/
+│   │       │   └── main.yml      # Tasks to deploy proxies
+│   │       └── templates/
+│   │           ├── gogogadget.env.j2         # Proxy environment file
+│   │           └── gogogadget-proxy.service.j2  # Proxy systemd service
+│   └── vault.yml                 # Encrypted secrets file (Ansible Vault)
+├── netbox_script.py              # Python script for Netbox/Zabbix integration
+└── README.md                     # Project documentation (you’re reading it!)
+```
+
 ```mermaid
 graph TD
     A[gogogadget/] --> B[src/]
