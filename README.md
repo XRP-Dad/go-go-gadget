@@ -1,21 +1,28 @@
-Go Go Gadget
-Go Go Gadget is a network reachability tool.
-Overview
+# Go Go Gadget
+
+**Go Go Gadget** is a network reachability tool.
+
+## Overview
+
 Go Go Gadget is a sophisticated network monitoring system designed to assess host reachability using Zabbix proxies. It performs checks like ping, traceroute, SNMP, and SSH port status, leveraging a server-proxy architecture. The server manages tasks via HTTP endpoints, while proxies execute checks and submit results. Integration with Zabbix and Netbox provides dynamic proxy and community data, and MariaDB ensures persistent storage. Ansible automates deployment for consistency and ease.
-Key Features
-Efficient Task Queuing: Utilizes Redis for scalable task distribution to proxies.
-Concurrent Checks: Parallel SNMP checks enhance performance.
-Robust Logging: Structured logging with logrus for detailed diagnostics.
-Flexible Scoring: Configurable weights for proxy selection (ping: 40%, hops: 20%, SNMP: 30%, SSH: 10%).
-Monitoring & Testing: New endpoints /health, /config, and /test-check for system health and mock testing.
-Prerequisites
-Operating System: Ubuntu 20.04+ (server and proxies).
-Ansible: Version 2.9+ for deployment automation.
-Go: Version 1.16+ to build the application (dependencies: go-ping, aeden/traceroute, gosnmp, go-sql-driver/mysql, sirupsen/logrus, go-redis, yaml.v3).
-MariaDB: Version 10.3+ for persistent storage.
-Redis: Version 6.0+ for task queuing.
-Python 3: For Netbox integration with pyzabbix and requests.
-SSH Access: Required for all target hosts with sudo privileges.
+
+### Key Features
+
+- **Efficient Task Queuing**: Utilizes Redis for scalable task distribution to proxies.
+- **Concurrent Checks**: Parallel SNMP checks enhance performance.
+- **Robust Logging**: Structured logging with `logrus` for detailed diagnostics.
+- **Flexible Scoring**: Configurable weights for proxy selection (ping: 40%, hops: 20%, SNMP: 30%, SSH: 10%).
+- **Monitoring & Testing**: New endpoints `/health`, `/config`, and `/test-check` for system health and mock testing.
+
+## Prerequisites
+
+- **Operating System**: Ubuntu 20.04+ (server and proxies).
+- **Ansible**: Version 2.9+ for deployment automation.
+- **Go**: Version 1.16+ to build the application (dependencies: `go-ping`, `aeden/traceroute`, `gosnmp`, `go-sql-driver/mysql`, `sirupsen/logrus`, `go-redis`, `yaml.v3`).
+- **MariaDB**: Version 10.3+ for persistent storage.
+- **Redis**: Version 6.0+ for task queuing.
+- **Python 3**: For Netbox integration with `pyzabbix` and `requests`.
+- **SSH Access**: Required for all target hosts with sudo privileges.
 
 ## Directory Structure
 
@@ -50,8 +57,8 @@ graph TD
     A --> AB[netbox_script.py <br> # Netbox/Zabbix integration]
     A --> AC[README.md <br> # Project documentation]
 
-
-Deployment Process
+```
+## Deployment Process
 Step 1: Prepare the Control Machine
 Install Dependencies:
 bash
@@ -101,7 +108,7 @@ export SERVER_URL=http://localhost:8080
 Starts a test proxy instance.
 Test Endpoints:
 bash
-curl -H "Authorization: Bearer abc123xyz789" -X POST -d '{"host":"8.8.8.8","communities":["public","private"]}' http://localhost:8080/start-check
+>curl -H "Authorization: Bearer abc123xyz789" -X POST -d '{"host":"8.8.8.8","communities":["public","private"]}' http://localhost:8080/start-check
 curl -H "Authorization: Bearer abc123xyz789" http://localhost:8080/health
 curl -H "Authorization: Bearer abc123xyz789" http://localhost:8080/config
 curl -H "Authorization: Bearer abc123xyz789" -X POST -d '{"host":"test.local"}' http://localhost:8080/test-check
@@ -168,7 +175,7 @@ Run a mock check:
 bash
 curl -H "Authorization: Bearer abc123xyz789" -X POST -d '{"host":"test.local"}' http://192.168.1.10:8080/test-check
 Process Flowchart
-mermaid
+'''mermaid
 graph TD
     A[Netbox Initiates Check] --> B[Server Creates Task]
     B --> C[Task Queued in Redis]
@@ -180,7 +187,7 @@ graph TD
     H --> I[Netbox Polls for Results]
     I --> J[Netbox Scores Proxies]
     J --> K[Best Proxy Selected]
-    K --> L[End]
+    K --> L[End]'''
 Flowchart Explanation
 Netbox Initiates Check: Netbox sends a POST request to /start-check with host and SNMP communities.
 Server Creates Task: A unique task ID is generated and stored in MariaDB.
