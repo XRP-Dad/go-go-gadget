@@ -205,7 +205,7 @@ graph TD
     J --> K[Best Proxy Selected]
     K --> L[End]
 ```
-##Flowchart Explanation
+## Flowchart Explanation
 1. Netbox Initiates Check: Netbox sends a POST request to /start-check with host and SNMP communities.
 2. Server Creates Task: A unique task ID is generated and stored in MariaDB.
 3. Task Queued in Redis: Task ID is pushed to a Redis queue for proxy pickup.
@@ -218,8 +218,8 @@ graph TD
 10. Netbox Scores Proxies: Applies weighted scoring (ping: 40%, hops: 20%, SNMP: 30%, SSH: 10%).
 11. Best Proxy Selected: Identifies the top-scoring proxy for monitoring.
 12. End: Process completes with the best proxy selected.
-###Troubleshooting
-#Logs:
+## Troubleshooting
+# Logs:
 Server: ```tail -f /var/log/gogogadget.log```(check for "Go-go Gadget" Easter egg on startup!)
 Proxy: Same log file, look for proxy-specific messages.
 MariaDB:
@@ -229,11 +229,11 @@ Check queue: ```redis-cli -h localhost -p 6379 llen task_queue```
 Service Status:
 ```sudo systemctl status gogogadget-server```
 ```sudo systemctl status gogogadget-proxy```
-Security Notes
+# Security Notes
 Credentials: Store API tokens and DB passwords in vault.yml, encrypted with a strong vault password.
-Firewall: Ensure only port 8080 is open (sudo ufw allow 8080/tcp).
+# Firewall: Ensure only port 8080 is open (sudo ufw allow 8080/tcp).
 Access Control: Restrict SSH access to trusted IPs and use key-based authentication.
-Easter Eggs
+## Easter Eggs
 Go-go Gadget Startup: Check the server logs for a "Go-go Gadget monitoring!" message on startup.
 GadgetScope Activation: The server logs "Activating GadgetScope for network surveillance!" when starting.
 Speed Boost Comment: In performChecks, find the "Go-go Gadget speed boost" comment in the SNMP section.
