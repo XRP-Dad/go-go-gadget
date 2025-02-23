@@ -16,37 +16,39 @@ MariaDB: Version 10.3+ for persistent storage.
 Redis: Version 6.0+ for task queuing.
 Python 3: For Netbox integration with pyzabbix and requests.
 SSH Access: Required for all target hosts with sudo privileges.
-Directory Structure
 
-gogogadget/
-├── src/
-│   └── gogogadget.go              # Core Go application for server and proxy functionality
-├── scripts/
-│   └── setup_database.sql         # MariaDB setup script for database initialization
-├── config/
-│   └── config.yml                # Configuration file for intervals and scoring weights
-├── ansible/
-│   ├── inventory.ini             # Defines server and proxy hosts
-│   ├── deploy.yml                # Main Ansible deployment playbook
-│   ├── group_vars/
-│   │   ├── zabbix_server.yml     # Server-specific variables (e.g., DB credentials)
-│   │   └── zabbix_proxies.yml    # Proxy-specific variables (e.g., server URL)
-│   ├── roles/
-│   │   ├── gogogadget_server/
-│   │   │   ├── tasks/
-│   │   │   │   └── main.yml      # Tasks to deploy the server
-│   │   │   └── templates/
-│   │   │       ├── gogogadget.env.j2         # Server environment file
-│   │   │       └── gogogadget-server.service.j2  # Server systemd service
-│   │   └── gogogadget_proxy/
-│   │       ├── tasks/
-│   │       │   └── main.yml      # Tasks to deploy proxies
-│   │       └── templates/
-│   │           ├── gogogadget.env.j2         # Proxy environment file
-│   │           └── gogogadget-proxy.service.j2  # Proxy systemd service
-│   └── vault.yml                 # Encrypted secrets file (Ansible Vault)
-├── netbox_script.py              # Python script for Netbox/Zabbix integration
-└── README.md                     # Project documentation (you’re reading it!)
+## Directory Structure
+
+```mermaid
+graph TD
+    A[gogogadget/] --> B[src/]
+    B --> C[gogogadget.go <br> # Core Go application]
+    A --> D[scripts/]
+    D --> E[setup_database.sql <br> # MariaDB setup script]
+    A --> F[config/]
+    F --> G[config.yml <br> # Config file]
+    A --> H[ansible/]
+    H --> I[inventory.ini <br> # Defines hosts]
+    H --> J[deploy.yml <br> # Ansible playbook]
+    H --> K[group_vars/]
+    K --> L[zabbix_server.yml <br> # Server vars]
+    K --> M[zabbix_proxies.yml <br> # Proxy vars]
+    H --> N[roles/]
+    N --> O[gogogadget_server/]
+    O --> P[tasks/]
+    P --> Q[main.yml <br> # Server tasks]
+    O --> R[templates/]
+    R --> S[gogogadget.env.j2 <br> # Server env]
+    R --> T[gogogadget-server.service.j2 <br> # Server service]
+    N --> U[gogogadget_proxy/]
+    U --> V[tasks/]
+    V --> W[main.yml <br> # Proxy tasks]
+    U --> X[templates/]
+    X --> Y[gogogadget.env.j2 <br> # Proxy env]
+    X --> Z[gogogadget-proxy.service.j2 <br> # Proxy service]
+    H --> AA[vault.yml <br> # Encrypted secrets]
+    A --> AB[netbox_script.py <br> # Netbox/Zabbix integration]
+    A --> AC[README.md <br> # Project documentation]
 
 
 Deployment Process
