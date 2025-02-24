@@ -22,9 +22,10 @@ CREATE TABLE IF NOT EXISTS results (
     result JSON,                              -- JSON object containing check results (e.g., {"ping": "10ms"})
     submitted TIMESTAMP DEFAULT CURRENT_TIMESTAMP,  -- Timestamp of result submission
     FOREIGN KEY (task_id) REFERENCES tasks(task_id) ON DELETE CASCADE,  -- Cascade delete when task is removed
-    INDEX idx_task_id (task_id)               -- Index on task_id for faster queries
+    INDEX idx_task_id (task_id),              -- Index on task_id for faster queries
+    INDEX idx_proxy_name (proxy_name)         -- Index on proxy_name for faster queries
 );
 
--- Grant full privileges to the Go Go Gadget user on the database
-GRANT ALL PRIVILEGES ON gogogadget_db.* TO 'gogogadget_user'@'localhost' IDENTIFIED BY 'secure_password';
+-- Grant necessary privileges to the Go Go Gadget user on the database (restricted for security)
+GRANT SELECT, INSERT, UPDATE, DELETE ON gogogadget_db.* TO 'gogogadget_user'@'localhost' IDENTIFIED BY 'secure_password';
 FLUSH PRIVILEGES;
