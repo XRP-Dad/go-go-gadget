@@ -272,9 +272,9 @@ sudo systemctl status gogogadget-server
 ```bash
 sudo systemctl status gogogadget-proxy
 ```
-# Security Notes
+## Security Notes
 Credentials: Store API tokens and DB passwords in vault.yml, encrypted with a strong vault password.
-# Firewall: Ensure only port 8080 is open (sudo ufw allow 8080/tcp).
+## Firewall: Ensure only port 8080 is open (sudo ufw allow 8080/tcp).
 Access Control: Restrict SSH access to trusted IPs and use key-based authentication.
 ## Easter Eggs
 Go-go Gadget Startup: Check the server logs for a "Go-go Gadget monitoring!" message on startup.
