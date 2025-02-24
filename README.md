@@ -252,16 +252,20 @@ graph TD
 12. End: Process completes with the best proxy selected.
 # Troubleshooting
 ## Logs:
-- Server: ```tail -f /var/log/gogogadget.log```(check for "Go-go Gadget" Easter egg on startup!)
+- Server:
+```bash
+tail -f /var/log/gogogadget.log
+```
+(check for "Go-go Gadget" Easter egg on startup!)
 - Proxy: Same log file, look for proxy-specific messages.
 - MariaDB:
 Verify connection: ```mysql -u gogogadget_user -pP@ssw0rd123! -e "SELECT 1;"```
 - Redis:
-Check queue:
+- Check queue:
 ```bash
 redis-cli -h localhost -p 6379 llen task_queue
 ```
-Service Status:
+- Service Status:
 ```bash
 sudo systemctl status gogogadget-server
 ```
