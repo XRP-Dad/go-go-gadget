@@ -14,7 +14,7 @@ Go Go Gadget is a sophisticated network monitoring system designed to assess hos
 - **Flexible Scoring**: Configurable weights for proxy selection (ping: 40%, hops: 20%, SNMP: 30%, SSH: 10%).
 - **Monitoring & Testing**: New endpoints `/health`, `/config`, and `/test-check` for system health and mock testing.
 
-## Prerequisites
+### Prerequisites
 
 - **Operating System**: Ubuntu 20.04+ (server and proxies).
 - **Ansible**: Version 2.9+ for deployment automation.
@@ -90,8 +90,8 @@ graph TD
     A --> AC[README.md <br> # Project documentation]
 ```
 ## Deployment Process
-Step 1: Prepare the Control Machine
-Install Dependencies:
+### Prepare the Control Machine
+### Install Dependencies:
 ```bash
 sudo apt update
 sudo apt install ansible git python3-pip -y
@@ -196,8 +196,8 @@ Server: API_TOKEN, DB_USER, DB_PASSWORD, DB_NAME
 Proxy: API_TOKEN, SERVER_URL
 Config File: ```/etc/gogogadget/config.yml``` defines polling intervals, SNMP timeouts, and scoring weights.
 ## Usage
-# Starting a Check
-# Initiate a reachability check:
+### Starting a Check
+### Initiate a reachability check:
 ```bash
 curl -H "Authorization: Bearer abc123xyz789" -X POST -d '{"host":"target.example.com","communities":["public","private"]}' http://192.168.1.10:8080/start-check
 ```
