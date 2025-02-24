@@ -1,6 +1,4 @@
 # Go Go Gadget Netbox Integration Script
-# This software is for internal use only by Point Broadband employees.
-# Unauthorized distribution or use is prohibited. Developed in 2025.
 
 import os
 import requests
