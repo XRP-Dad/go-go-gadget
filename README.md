@@ -252,14 +252,14 @@ graph TD
 12. End: Process completes with the best proxy selected.
 ## Troubleshooting
 # Logs:
-Server: ```tail -f /var/log/gogogadget.log```(check for "Go-go Gadget" Easter egg on startup!)
-Proxy: Same log file, look for proxy-specific messages.
-MariaDB:
+- Server: ```tail -f /var/log/gogogadget.log```(check for "Go-go Gadget" Easter egg on startup!)
+- Proxy: Same log file, look for proxy-specific messages.
+- MariaDB:
 Verify connection: ```mysql -u gogogadget_user -pP@ssw0rd123! -e "SELECT 1;"```
-Redis:
-Check queue: ```redis-cli -h localhost -p 6379 llen task_queue```
-Service Status:
-```sudo systemctl status gogogadget-server```
+- Redis:
+> Check queue: ```redis-cli -h localhost -p 6379 llen task_queue```
+> Service Status:
+```bash sudo systemctl status gogogadget-server```
 ```sudo systemctl status gogogadget-proxy```
 # Security Notes
 Credentials: Store API tokens and DB passwords in vault.yml, encrypted with a strong vault password.
