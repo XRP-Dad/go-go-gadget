@@ -38,7 +38,19 @@ var (
 	taskQueue   = make(chan Task, 100)   // Buffered channel for task distribution
 	proxyMu     sync.Mutex               // Mutex to protect proxy status map
 	proxyStatus = make(map[string]int64) // Tracks last heartbeat timestamp for proxies
+
+	// In-memory cache for results
+	cacheMu sync.Mutex
+	cache   = make(map[string]CacheEntry)
 )
+
+// CacheEntry defines the structure for cached results
+type CacheEntry struct {
+	results []Result
+	expires time.Time
+}
+
+const cacheTTL = 5 * time.Minute
 
 // Config represents the application configuration loaded from config.yml
 type Config struct {
@@ -79,7 +91,7 @@ func main() {
 	// Setup structured logging with JSON format for better traceability
 	logger = logrus.New()
 	logger.SetFormatter(&logrus.JSONFormatter{})
-	logFile, _ := os.OpenFile("/var/log/gogogadget.log", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+	logFile, err := os.OpenFile("/var/log/gogogadget.log", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
 	if err != nil {
 		fmt.Printf("Failed to open log file: %v\n", err)
 		os.Exit(1)
@@ -333,6 +345,10 @@ func submitResultHandler(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		logger.WithError(err).Warn("Failed to update task status to complete")
 	}
+	// Cache the result in memory
+	cacheMu.Lock()
+	cache[result.TaskID] = CacheEntry{results: []Result{result}, expires: time.Now().Add(cacheTTL)}
+	cacheMu.Unlock()
 	logger.WithFields(logrus.Fields{"task_id": result.TaskID, "proxy_name": result.ProxyName}).Info("Result submitted successfully")
 	w.WriteHeader(http.StatusOK)
 }
@@ -348,6 +364,18 @@ func getResultsHandler(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Missing task_id", http.StatusBadRequest)
 		return
 	}
+
+	// Check cache first
+	cacheMu.Lock()
+	if entry, ok := cache[taskID]; ok && time.Now().Before(entry.expires) {
+		cacheMu.Unlock()
+		logger.WithFields(logrus.Fields{"task_id": taskID}).Debug("Serving result from cache")
+		w.Header().Set("Content-Type", "application/json")
+		json.NewEncoder(w).Encode(entry.results)
+		return
+	}
+	cacheMu.Unlock()
+
 	// Query all results for the task from MariaDB
 	rows, err := db.Query("SELECT proxy_name, result FROM results WHERE task_id = ?", taskID)
 	if err != nil {
@@ -375,6 +403,12 @@ func getResultsHandler(w http.ResponseWriter, r *http.Request) {
 	if !complete && len(results) == 0 {
 		http.Error(w, "Task not complete or no results", http.StatusNotFound)
 		return
+	}
+	// Cache the results if found
+	if len(results) > 0 {
+		cacheMu.Lock()
+		cache[taskID] = CacheEntry{results: results, expires: time.Now().Add(cacheTTL)}
+		cacheMu.Unlock()
 	}
 	logger.WithFields(logrus.Fields{"task_id": taskID, "result_count": len(results)}).Info("Task results retrieved")
 	w.Header().Set("Content-Type", "application/json")
@@ -478,22 +512,33 @@ func getConnectedProxies() int {
 
 // startProxy runs the Go Go Gadget proxy, polling for tasks and sending heartbeats
 func startProxy(ctx context.Context, port, proxyName string) {
-	ticker := time.NewTicker(time.Duration(cfg.PollingInterval) * time.Second)
-	defer ticker.Stop()
 	heartbeat := time.NewTicker(30 * time.Second)
 	defer heartbeat.Stop()
 
+	// Launch polling goroutine with exponential backoff
+	go func() {
+		minInterval := 1 * time.Second
+		maxInterval := 30 * time.Second
+		currentInterval := minInterval
+		for {
+			task := pollTasks(serverURL, proxyName)
+			if task.TaskID != "" {
+				results := performChecks(task)
+				submitResult(serverURL, Result{TaskID: task.TaskID, ProxyName: proxyName, Result: results})
+				currentInterval = minInterval
+			} else {
+				time.Sleep(currentInterval)
+				currentInterval = minDur(currentInterval*2, maxInterval)
+			}
+		}
+	}()
+
+	// Handle heartbeat and shutdown
 	for {
 		select {
 		case <-ctx.Done():
 			logger.Info("Proxy shutting down")
 			return
-		case <-ticker.C:
-			task := pollTasks(serverURL, proxyName)
-			if task.TaskID != "" {
-				results := performChecks(task)
-				submitResult(serverURL, Result{TaskID: task.TaskID, ProxyName: proxyName, Result: results})
-			}
 		case <-heartbeat.C:
 			sendHeartbeat(serverURL, proxyName)
 		}
@@ -698,4 +743,12 @@ func sendHeartbeat(serverURL, proxyName string) {
 	}
 	defer resp.Body.Close()
 	logger.WithFields(logrus.Fields{"proxy_name": proxyName}).Debug("Heartbeat sent successfully")
+}
+
+// minDur returns the minimum of two time.Duration values
+func minDur(a, b time.Duration) time.Duration {
+	if a < b {
+		return a
+	}
+	return b
 }

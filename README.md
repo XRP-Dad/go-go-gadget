@@ -13,6 +13,12 @@ Go Go Gadget is a sophisticated network monitoring system designed to assess hos
 - **Robust Logging**: Structured logging with `logrus` for detailed diagnostics.
 - **Flexible Scoring**: Configurable weights for proxy selection (ping: 40%, hops: 20%, SNMP: 30%, SSH: 10%).
 - **Monitoring & Testing**: New endpoints `/health`, `/config`, and `/test-check` for system health and mock testing.
+- **Optimized Proxy Polling**: Proxies use exponential backoff to reduce server load during idle periods.
+- **In-Memory Caching**: Results are cached for 5 minutes to improve retrieval performance.
+- **Structured Python Logging**: Enhanced logging in the Python integration script for better debugging.
+- **Timeout Mechanism**: Prevents infinite polling for results in the Python script with a 5-minute timeout.
+- **Improved Error Handling**: Enhanced error handling with detailed logging in both Go and Python components.
+-
 
 ### Prerequisites
 
@@ -245,8 +251,8 @@ graph TD
 5. Proxy Fetches Task: A proxy retrieves a task ID and details from the server.
 6. Proxy Performs Checks: Executes ping, traceroute, SNMP (in parallel), and SSH checks.
 7. Proxy Submits Results: Sends results to /submit-result.
-8. Server Stores Results: Results are saved in MariaDB, task marked complete.
-9. Netbox Polls for Results: Queries /get-results until data is available.
+8. Server Stores Results: Results are saved in MariaDB, task marked complete, and cached in memory for 5 minutes.
+9. Netbox Polls for Results: Queries /get-results with a 5-minute timeout to prevent infinite polling.
 10. Netbox Scores Proxies: Applies weighted scoring (ping: 40%, hops: 20%, SNMP: 30%, SSH: 10%).
 11. Best Proxy Selected: Identifies the top-scoring proxy for monitoring.
 12. End: Process completes with the best proxy selected.
@@ -272,11 +278,11 @@ sudo systemctl status gogogadget-server
 ```bash
 sudo systemctl status gogogadget-proxy
 ```
-## Security Notes
+# Security Notes
 Credentials: Store API tokens and DB passwords in vault.yml, encrypted with a strong vault password.
 ## Firewall: Ensure only port 8080 is open (sudo ufw allow 8080/tcp).
 Access Control: Restrict SSH access to trusted IPs and use key-based authentication.
-## Easter Eggs
+# Easter Eggs
 Go-go Gadget Startup: Check the server logs for a "Go-go Gadget monitoring!" message on startup.
 GadgetScope Activation: The server logs "Activating GadgetScope for network surveillance!" when starting.
 Speed Boost Comment: In performChecks, find the "Go-go Gadget speed boost" comment in the SNMP section.
