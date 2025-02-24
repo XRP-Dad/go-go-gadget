@@ -250,17 +250,24 @@ graph TD
 10. Netbox Scores Proxies: Applies weighted scoring (ping: 40%, hops: 20%, SNMP: 30%, SSH: 10%).
 11. Best Proxy Selected: Identifies the top-scoring proxy for monitoring.
 12. End: Process completes with the best proxy selected.
-## Troubleshooting
-# Logs:
+# Troubleshooting
+## Logs:
 - Server: ```tail -f /var/log/gogogadget.log```(check for "Go-go Gadget" Easter egg on startup!)
 - Proxy: Same log file, look for proxy-specific messages.
 - MariaDB:
 Verify connection: ```mysql -u gogogadget_user -pP@ssw0rd123! -e "SELECT 1;"```
 - Redis:
-> Check queue: ```redis-cli -h localhost -p 6379 llen task_queue```
-> Service Status:
-```bash sudo systemctl status gogogadget-server```
-```sudo systemctl status gogogadget-proxy```
+Check queue:
+```bash
+redis-cli -h localhost -p 6379 llen task_queue
+```
+Service Status:
+```bash
+sudo systemctl status gogogadget-server
+```
+```bash
+sudo systemctl status gogogadget-proxy
+```
 # Security Notes
 Credentials: Store API tokens and DB passwords in vault.yml, encrypted with a strong vault password.
 # Firewall: Ensure only port 8080 is open (sudo ufw allow 8080/tcp).
